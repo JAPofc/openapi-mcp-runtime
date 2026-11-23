@@ -5,7 +5,7 @@ Thanks for your interest in improving `openapi-mcp-runtime`.
 ## Setup
 
 ```bash
-git clone https://github.com/japofc/openapi-mcp-runtime.git
+git clone https://github.com/JAPofc/openapi-mcp-runtime.git
 cd openapi-mcp-runtime
 npm install
 npm test

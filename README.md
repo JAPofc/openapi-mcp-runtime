@@ -1,9 +1,9 @@
 # openapi-mcp-runtime
 
 [![npm](https://img.shields.io/npm/v/openapi-mcp-runtime)](https://www.npmjs.com/package/openapi-mcp-runtime)
-[![license](https://img.shields.io/npm/l/openapi-mcp-runtime)](https://github.com/japofc/openapi-mcp-runtime/blob/main/LICENSE)
+[![license](https://img.shields.io/npm/l/openapi-mcp-runtime)](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/LICENSE)
 [![node](https://img.shields.io/node/v/openapi-mcp-runtime)](https://nodejs.org)
-[![CI](https://github.com/japofc/openapi-mcp-runtime/actions/workflows/ci.yml/badge.svg)](https://github.com/japofc/openapi-mcp-runtime/actions/workflows/ci.yml)
+[![CI](https://github.com/JAPofc/openapi-mcp-runtime/actions/workflows/ci.yml/badge.svg)](https://github.com/JAPofc/openapi-mcp-runtime/actions/workflows/ci.yml)
 
 Turn any OpenAPI 3.0, 3.1 or Swagger 2.0 document into a live
 [Model Context Protocol](https://modelcontextprotocol.io) server. Every API

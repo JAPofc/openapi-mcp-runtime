@@ -46,13 +46,13 @@
   ],
   "author": "japofc",
   "license": "MIT",
-  "homepage": "https://github.com/japofc/openapi-mcp-runtime#readme",
+  "homepage": "https://github.com/JAPofc/openapi-mcp-runtime#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/japofc/openapi-mcp-runtime.git"
+    "url": "https://github.com/JAPofc/openapi-mcp-runtime.git"
   },
   "bugs": {
-    "url": "https://github.com/japofc/openapi-mcp-runtime/issues"
+    "url": "https://github.com/JAPofc/openapi-mcp-runtime/issues"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^11.7.2",

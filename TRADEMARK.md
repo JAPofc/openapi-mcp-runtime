@@ -21,6 +21,6 @@ license, provided that:
 Canonical sources:
 
 - npm: https://www.npmjs.com/package/openapi-mcp-runtime
-- source: https://github.com/japofc/openapi-mcp-runtime
+- source: https://github.com/JAPofc/openapi-mcp-runtime
 
 For trademark licensing inquiries, open an issue in the source repository.
