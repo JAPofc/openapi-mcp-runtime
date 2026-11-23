@@ -79,20 +79,20 @@ Inspect the tools that would be exposed:
 npx openapi-mcp-runtime ./petstore.yaml --print-tools
 ```
 
-A sample spec lives in [`examples/petstore.yaml`](examples/petstore.yaml).
+A sample spec lives in [`examples/petstore.yaml`](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/examples/petstore.yaml).
 
 ## Integrations
 
 Ready-made configurations and framework adapters are in
-[`examples/integrations/`](examples/integrations):
+[`examples/integrations/`](https://github.com/JAPofc/openapi-mcp-runtime/tree/main/examples/integrations):
 
 | Target | File |
 |---|---|
-| Claude Desktop | [`claude-desktop.json`](examples/integrations/claude-desktop.json) |
-| Cursor | [`cursor.json`](examples/integrations/cursor.json) |
-| Hono | [`hono.ts`](examples/integrations/hono.ts) |
-| Express | [`express.ts`](examples/integrations/express.ts) |
-| Next.js (App Router) | [`nextjs-route.ts`](examples/integrations/nextjs-route.ts) |
+| Claude Desktop | [`claude-desktop.json`](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/examples/integrations/claude-desktop.json) |
+| Cursor | [`cursor.json`](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/examples/integrations/cursor.json) |
+| Hono | [`hono.ts`](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/examples/integrations/hono.ts) |
+| Express | [`express.ts`](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/examples/integrations/express.ts) |
+| Next.js (App Router) | [`nextjs-route.ts`](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/examples/integrations/nextjs-route.ts) |
 
 **Claude Desktop** — add to `claude_desktop_config.json`:
 
@@ -232,7 +232,7 @@ authentication, caching, the MCP protocol, the HTTP transport and the CLI.
 ## Publishing
 
 Releases are automated with GitHub Actions (see
-[`.github/workflows/publish.yml`](.github/workflows/publish.yml)). Push a
+[`.github/workflows/publish.yml`](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/.github/workflows/publish.yml)). Push a
 version tag and CI builds, tests, publishes to npm with provenance, and creates
 a GitHub release.
 
@@ -247,10 +247,10 @@ The name **japofc** and the project branding are trademarks of japofc. The MIT
 license covers the code only and does not grant any rights to the name or
 branding. Forks and derivative works must keep the copyright notice and license
 text, and must not present themselves as official releases. See
-[TRADEMARK.md](TRADEMARK.md).
+[TRADEMARK.md](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/TRADEMARK.md).
 
 ## License and attribution
 
 MIT License. Copyright (c) 2026 **japofc** — author and maintainer.
 
-Docs: [`docs/index.html`](docs/index.html) · Source: `src/` · Tests: `test/`
+Docs: <https://japofc.github.io/openapi-mcp-runtime/> · Source: `src/` · Tests: `test/`
