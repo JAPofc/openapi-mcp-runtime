@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an improvement or new capability
+title: "[feat] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to do today, and what is missing?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the CLI flag, API, or behavior you would like.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Any workarounds or other tools you tried.
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to open a pull request for this.

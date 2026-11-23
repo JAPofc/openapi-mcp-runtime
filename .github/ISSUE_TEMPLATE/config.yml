@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/JAPofc/openapi-mcp-runtime/discussions
+    about: Ask questions, share ideas, or show what you built.
+  - name: Security vulnerability
+    url: https://github.com/JAPofc/openapi-mcp-runtime/security/advisories/new
+    about: Please report security issues privately, not in a public issue.

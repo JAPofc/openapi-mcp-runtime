@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a problem with openapi-mcp-runtime
+title: "[bug] "
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong? What did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Exact commands or code, including flags.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: OpenAPI document
+      description: Attach the spec or a minimal example that triggers the issue. Remove anything sensitive.
+      placeholder: |
+        openapi: 3.0.3
+        ...
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: node
+    attributes:
+      label: Node.js version
+      options:
+        - "22"
+        - "20"
+        - "18"
+        - Other
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / error output
+      render: text
