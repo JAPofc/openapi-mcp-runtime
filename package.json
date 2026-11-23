@@ -1,6 +1,6 @@
 {
   "name": "openapi-mcp-runtime",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Turn any OpenAPI / Swagger spec into a live MCP server — stdio & HTTP, auth, caching, typed tools.",
   "type": "module",
   "main": "./dist/index.js",
@@ -19,7 +19,9 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "SECURITY.md",
+    "TRADEMARK.md"
   ],
   "engines": {
     "node": ">=18.17"
