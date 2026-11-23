@@ -229,28 +229,17 @@ npm run dev     # watch mode
 The test suite covers the spec parser, tool conversion, request building,
 authentication, caching, the MCP protocol, the HTTP transport and the CLI.
 
-## Publishing
-
-Releases are automated with GitHub Actions (see
-[`.github/workflows/publish.yml`](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/.github/workflows/publish.yml)). Push a
-version tag and CI builds, tests, publishes to npm with provenance, and creates
-a GitHub release.
-
 ## Contributing
 
 Issues and pull requests are welcome. Please open an issue before large changes
 so the design can be discussed. Keep the test suite green: `npm test`.
 
-## Trademark
+## License
 
-The name **japofc** and the project branding are trademarks of japofc. The MIT
-license covers the code only and does not grant any rights to the name or
-branding. Forks and derivative works must keep the copyright notice and license
-text, and must not present themselves as official releases. See
+MIT License — Copyright (c) 2026 japofc (author and maintainer).
+
+The name **japofc** and the project branding are trademarks of japofc; the
+license covers the code only. See
 [TRADEMARK.md](https://github.com/JAPofc/openapi-mcp-runtime/blob/main/TRADEMARK.md).
-
-## License and attribution
-
-MIT License. Copyright (c) 2026 **japofc** — author and maintainer.
 
 Docs: <https://japofc.github.io/openapi-mcp-runtime/> · Source: `src/` · Tests: `test/`
