@@ -226,14 +226,10 @@ authentication, caching, the MCP protocol, the HTTP transport and the CLI.
 
 ## Publishing
 
-Publishing is automated with GitHub Actions (see
-[`.github/workflows/publish.yml`](.github/workflows/publish.yml)):
-
-1. Create an npm access token with **Publish** permission and add it as the
-   `NPM_TOKEN` repository secret.
-2. Push a version tag: `git tag v0.1.0 && git push origin v0.1.0`.
-3. CI builds, tests and runs `npm publish --provenance`, then creates a GitHub
-   release from the tag.
+Releases are automated with GitHub Actions (see
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml)). Push a
+version tag and CI builds, tests, publishes to npm with provenance, and creates
+a GitHub release.
 
 ## Contributing
 
