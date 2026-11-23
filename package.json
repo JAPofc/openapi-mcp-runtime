@@ -1,0 +1,66 @@
+{
+  "name": "openapi-mcp-runtime",
+  "version": "0.1.0",
+  "description": "Turn any OpenAPI / Swagger spec into a live MCP server — stdio & HTTP, auth, caching, typed tools.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "openapi-mcp-runtime": "./dist/cli.js",
+    "omcp": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc --watch -p tsconfig.json",
+    "test": "npm run build && node --test test/",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "openapi",
+    "swagger",
+    "mcp-server",
+    "ai",
+    "llm",
+    "agents",
+    "tools",
+    "api",
+    "rest",
+    "json-rpc"
+  ],
+  "author": "japofc",
+  "license": "MIT",
+  "homepage": "https://github.com/japofc/openapi-mcp-runtime#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/japofc/openapi-mcp-runtime.git"
+  },
+  "bugs": {
+    "url": "https://github.com/japofc/openapi-mcp-runtime/issues"
+  },
+  "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^11.7.2",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  }
+}

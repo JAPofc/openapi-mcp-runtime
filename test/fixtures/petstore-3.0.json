@@ -1,0 +1,53 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Petstore", "version": "1.0.0" },
+  "servers": [{ "url": "http://127.0.0.1:4010" }],
+  "security": [{ "apiKey": [] }],
+  "paths": {
+    "/pets/{petId}": {
+      "get": {
+        "operationId": "getPetById",
+        "summary": "Info for a specific pet",
+        "parameters": [
+          { "name": "petId", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "verbose", "in": "query", "schema": { "type": "boolean", "default": false } }
+        ],
+        "responses": { "200": { "description": "ok" } }
+      },
+      "delete": {
+        "operationId": "deletePet",
+        "parameters": [
+          { "name": "petId", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "204": { "description": "deleted" } }
+      }
+    },
+    "/pets": {
+      "post": {
+        "operationId": "createPet",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "tag": { "type": "string" }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "created" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": { "type": "apiKey", "in": "header", "name": "X-API-Key" },
+      "bearer": { "type": "http", "scheme": "bearer" }
+    }
+  }
+}

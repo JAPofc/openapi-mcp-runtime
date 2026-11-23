@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info:
+  title: Petstore
+  version: 1.0.0
+  description: Sample API for trying openapi-mcp-runtime
+servers:
+  - url: https://petstore3.swagger.io/api/v3
+paths:
+  /pet/{petId}:
+    get:
+      operationId: getPetById
+      summary: Info for a specific pet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: ok
+  /pet/findByStatus:
+    get:
+      operationId: findPetsByStatus
+      summary: Finds Pets by status
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [available, pending, sold]
+      responses:
+        "200":
+          description: ok
+  /pet:
+    post:
+      operationId: addPet
+      summary: Add a new pet to the store
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                status:
+                  type: string
+      responses:
+        "200":
+          description: ok
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: api_key

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>openapi-mcp-runtime — OpenAPI/Swagger → MCP server</title>
+<meta name="description" content="Turn any OpenAPI 3.0, 3.1 or Swagger 2.0 spec into a live MCP server. stdio & HTTP, auth, caching, typed tools." />
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #121a30;
+    --panel-2: #0f1730;
+    --text: #e8edf7;
+    --muted: #9aa7c2;
+    --accent: #6ea8fe;
+    --accent-2: #4ade80;
+    --border: #1f2b4a;
+    --code-bg: #0a1226;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  header.nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(11,16,32,.9);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  header.nav .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
+  header.nav .brand { font-weight: 700; letter-spacing: .2px; color: var(--text); }
+  header.nav .brand span { color: var(--accent); }
+  header.nav nav { display: flex; gap: 18px; margin-left: auto; }
+  header.nav nav a { color: var(--muted); font-size: 14px; }
+  header.nav nav a:hover { color: var(--text); text-decoration: none; }
+  .hero { padding: 72px 0 40px; border-bottom: 1px solid var(--border); }
+  .hero h1 { font-size: 44px; line-height: 1.15; margin: 0 0 14px; letter-spacing: -0.5px; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { font-size: 18px; color: var(--muted); max-width: 720px; margin: 0 0 22px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+  .badge {
+    font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+    background: var(--panel); border: 1px solid var(--border); color: var(--muted);
+  }
+  .badge b { color: var(--accent-2); }
+  .install {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 15px;
+  }
+  .install .prompt { color: var(--accent-2); }
+  section { padding: 48px 0; border-bottom: 1px solid var(--border); }
+  section h2 { font-size: 26px; margin: 0 0 8px; letter-spacing: -0.2px; }
+  section .lead { color: var(--muted); margin: 0 0 24px; max-width: 760px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 16px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .card code { color: var(--accent-2); font-size: 13px; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; overflow-x: auto; font-size: 14px; line-height: 1.55;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  pre .c { color: #6b7a99; }
+  pre .p { color: var(--accent-2); }
+  pre .s { color: #f7c66b; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  td code { color: var(--accent-2); }
+  .tabs { display: flex; gap: 8px; margin-bottom: 0; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 14px; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 14px; font-weight: 600;
+    background: var(--panel); color: var(--muted); border: 1px solid var(--border); border-bottom: none;
+  }
+  .tab.active { color: var(--text); background: var(--code-bg); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .tab-panel pre { border-radius: 0 10px 10px 10px; }
+  footer { padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
+  footer .wm { color: var(--text); font-weight: 700; letter-spacing: .5px; }
+  .note { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .faq details { border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; background: var(--panel); }
+  .faq summary { cursor: pointer; font-weight: 600; }
+  .faq p { color: var(--muted); margin: 10px 0 0; }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <div class="brand">openapi<span>-mcp-runtime</span></div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#quickstart">Quickstart</a>
+      <a href="#integrations">Integrations</a>
+      <a href="#cli">CLI</a>
+      <a href="#auth">Auth</a>
+      <a href="#api">API</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <h1>OpenAPI / Swagger <span>→ live MCP server</span></h1>
+    <p>Point <code>openapi-mcp-runtime</code> at any OpenAPI 3.0, 3.1 or Swagger 2.0 document and every API operation becomes a tool your AI agents can call — with auth, caching and typed arguments. No wrapper code, no build step.</p>
+    <div class="badges">
+      <span class="badge">npm <b>openapi-mcp-runtime</b></span>
+      <span class="badge">Node <b>≥ 18.17</b></span>
+      <span class="badge">License <b>MIT</b></span>
+      <span class="badge">Maintainer <b>japofc</b></span>
+    </div>
+    <div class="install"><span class="prompt">$</span> npx openapi-mcp-runtime ./petstore.yaml</div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Features</h2>
+    <p class="lead">A runtime, not a code generator. The server proxies the live API, so spec changes take effect on restart.</p>
+    <div class="grid">
+      <div class="card"><h3>Zero-config</h3><p>One command, any spec. Tools are live immediately.</p></div>
+      <div class="card"><h3>stdio + HTTP</h3><p>Claude Desktop / Cursor over stdio, remote clients over Streamable HTTP.</p></div>
+      <div class="card"><h3>Full security</h3><p><code>apiKey</code>, <code>bearer</code>, <code>basic</code>, OAuth2 client credentials.</p></div>
+      <div class="card"><h3>Typed tools</h3><p>Arguments derive from the spec's JSON Schemas.</p></div>
+      <div class="card"><h3>GET caching</h3><p>Optional TTL cache for idempotent reads.</p></div>
+      <div class="card"><h3>Any <code>$ref</code></h3><p>Internal, external-file and remote refs are dereferenced.</p></div>
+      <div class="card"><h3>Tiny</h3><p>2 runtime dependencies, ESM-native TypeScript.</p></div>
+      <div class="card"><h3>Library + CLI</h3><p>Use it programmatically or from the terminal.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="quickstart">
+  <div class="wrap">
+    <h2>Quickstart</h2>
+    <p class="lead">Serve a spec, then connect any MCP client.</p>
+    <div class="tabs">
+      <div class="tab active" data-tab="stdio">stdio</div>
+      <div class="tab" data-tab="http">HTTP</div>
+      <div class="tab" data-tab="inspect">Inspect tools</div>
+    </div>
+    <div class="tab-panel active" data-tab="stdio">
+      <pre><span class="c"># Serve over stdio (JSON-RPC on stdin/stdout)</span>
+npx openapi-mcp-runtime ./petstore.yaml
+
+<span class="c"># Logs go to stderr, so stdout stays clean JSON-RPC</span>
+[openapi-mcp] Loaded OpenAPI 3.0.3 — 3 tool(s) exposed.
+[openapi-mcp] Base URL: https://petstore3.swagger.io/api/v3</pre>
+    </div>
+    <div class="tab-panel" data-tab="http">
+      <pre>npx openapi-mcp-runtime ./petstore.yaml --transport http --port 8787
+<span class="c"># MCP endpoint:  http://127.0.0.1:8787/mcp</span>
+<span class="c"># Health check:  http://127.0.0.1:8787/health</span></pre>
+    </div>
+    <div class="tab-panel" data-tab="inspect">
+      <pre>npx openapi-mcp-runtime ./petstore.yaml --print-tools</pre>
+    </div>
+    <p class="note">Example spec: <code>examples/petstore.yaml</code> in the repository.</p>
+  </div>
+</section>
+
+<section id="integrations">
+  <div class="wrap">
+    <h2>Integrations</h2>
+    <p class="lead">Ready-made configs and framework adapters. All examples live in <code>examples/integrations/</code>.</p>
+    <div class="tabs">
+      <div class="tab active" data-tab="claude">Claude Desktop</div>
+      <div class="tab" data-tab="cursor">Cursor</div>
+      <div class="tab" data-tab="hono">Hono</div>
+      <div class="tab" data-tab="nextjs">Next.js</div>
+    </div>
+    <div class="tab-panel active" data-tab="claude">
+      <pre><span class="c">// ~/Library/Application Support/Claude/claude_desktop_config.json</span>
+{
+  <span class="s">"mcpServers"</span>: {
+    <span class="s">"petstore"</span>: {
+      <span class="s">"command"</span>: <span class="s">"npx"</span>,
+      <span class="s">"args"</span>: [<span class="s">"-y"</span>, <span class="s">"openapi-mcp-runtime"</span>, <span class="s">"./examples/petstore.yaml"</span>]
+    }
+  }
+}</pre>
+    </div>
+    <div class="tab-panel" data-tab="cursor">
+      <pre><span class="c">// .cursor/mcp.json</span>
+{
+  <span class="s">"mcpServers"</span>: {
+    <span class="s">"petstore"</span>: {
+      <span class="s">"command"</span>: <span class="s">"npx"</span>,
+      <span class="s">"args"</span>: [<span class="s">"-y"</span>, <span class="s">"openapi-mcp-runtime"</span>, <span class="s">"./examples/petstore.yaml"</span>]
+    }
+  }
+}</pre>
+    </div>
+    <div class="tab-panel" data-tab="hono">
+      <pre><span class="c">// examples/integrations/hono.ts — Hono server with an MCP endpoint</span>
+<span class="p">import</span> { Hono } <span class="p">from</span> <span class="s">"hono"</span>;
+<span class="p">import</span> { createHandler, createRuntime, executeTool, loadSpec } <span class="p">from</span> <span class="s">"openapi-mcp-runtime"</span>;
+
+<span class="p">const</span> runtime = createRuntime(<span class="p">await</span> loadSpec(<span class="s">"./examples/petstore.yaml"</span>));
+<span class="p">const</span> handler = createHandler({ tools: runtime.tools, execute });
+
+<span class="p">const</span> app = <span class="p">new</span> Hono();
+app.post(<span class="s">"/mcp"</span>, <span class="p">async</span> (c) => {
+  <span class="p">const</span> response = <span class="p">await</span> handler(<span class="p">await</span> c.req.json());
+  <span class="p">return</span> response === <span class="p">null</span> ? <span class="p">new</span> Response(<span class="p">null</span>, { status: 202 }) : c.json(response);
+});
+app.get(<span class="s">"/health"</span>, (c) => c.json({ ok: <span class="p">true</span> }));</pre>
+    </div>
+    <div class="tab-panel" data-tab="nextjs">
+      <pre><span class="c">// app/api/mcp/route.ts — Next.js App Router</span>
+<span class="p">import</span> { createHandler, createRuntime, executeTool, loadSpec } <span class="p">from</span> <span class="s">"openapi-mcp-runtime"</span>;
+
+<span class="p">const</span> runtime = createRuntime(<span class="p">await</span> loadSpec(<span class="s">"./examples/petstore.yaml"</span>));
+<span class="p">const</span> handler = createHandler({ tools: runtime.tools, execute });
+
+<span class="p">export async function</span> POST(request: Request) {
+  <span class="p">const</span> response = <span class="p">await</span> handler(<span class="p">await</span> request.json());
+  <span class="p">return</span> response === <span class="p">null</span> ? <span class="p">new</span> Response(<span class="p">null</span>, { status: 202 }) : Response.json(response);
+}
+<span class="p">export async function</span> GET() {
+  <span class="p">return</span> Response.json({ ok: <span class="p">true</span>, tools: runtime.tools.length });
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section id="cli">
+  <div class="wrap">
+    <h2>CLI reference</h2>
+    <p class="lead">All options can be combined. Logs go to stderr; <code>--print-tools</code> writes JSON to stdout.</p>
+    <table>
+      <thead><tr><th>Option</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>--transport &lt;stdio|http&gt;</code></td><td>Transport to serve (default <code>stdio</code>).</td></tr>
+        <tr><td><code>--port &lt;number&gt;</code></td><td>HTTP port (default <code>8787</code>).</td></tr>
+        <tr><td><code>--host &lt;host&gt;</code></td><td>HTTP host (default <code>127.0.0.1</code>; use <code>0.0.0.0</code> to expose).</td></tr>
+        <tr><td><code>--server &lt;url&gt;</code></td><td>Override the server URL from the spec.</td></tr>
+        <tr><td><code>--header &lt;NAME=VALUE&gt;</code></td><td>Extra header, repeatable. <code>${ENV_VAR}</code> is expanded.</td></tr>
+        <tr><td><code>--bearer &lt;token&gt;</code></td><td>Bearer token for <code>http bearer</code> schemes.</td></tr>
+        <tr><td><code>--basic &lt;USER:PASS&gt;</code></td><td>Basic auth credentials.</td></tr>
+        <tr><td><code>--api-key &lt;NAME=VALUE&gt;</code></td><td>Value for an <code>apiKey</code> scheme, repeatable.</td></tr>
+        <tr><td><code>--oauth2 &lt;SCHEME=ID:SECRET&gt;</code></td><td>OAuth2 client credentials, repeatable.</td></tr>
+        <tr><td><code>--scope &lt;SCHEME=a,b&gt;</code></td><td>OAuth2 scopes, repeatable.</td></tr>
+        <tr><td><code>--cache-ttl &lt;seconds&gt;</code></td><td>Cache <code>GET</code> responses for N seconds (default <code>0</code>).</td></tr>
+        <tr><td><code>--timeout &lt;ms&gt;</code></td><td>Request timeout in milliseconds (default <code>30000</code>).</td></tr>
+        <tr><td><code>--print-tools</code></td><td>Print generated tools as JSON and exit.</td></tr>
+        <tr><td><code>--generate-types &lt;file&gt;</code></td><td>Write TypeScript argument types to a file.</td></tr>
+        <tr><td><code>--generate-client &lt;file&gt;</code></td><td>Write a self-contained TypeScript client.</td></tr>
+        <tr><td><code>--verbose</code></td><td>Log more detail to stderr.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="auth">
+  <div class="wrap">
+    <h2>Authentication</h2>
+    <p class="lead">Credentials are matched to the spec's <code>securitySchemes</code> by name. Missing credentials never crash the server — the call proceeds unauthenticated and the API decides.</p>
+    <pre><span class="c"># apiKey scheme</span>
+npx openapi-mcp-runtime ./api.yaml --api-key apiKey=my-secret
+
+<span class="c"># bearer</span>
+npx openapi-mcp-runtime ./api.yaml --bearer <span class="s">"$TOKEN"</span>
+
+<span class="c"># basic</span>
+npx openapi-mcp-runtime ./api.yaml --basic user:pass
+
+<span class="c"># OAuth2 client credentials (tokenUrl comes from the spec)</span>
+npx openapi-mcp-runtime ./api.yaml --oauth2 myOAuth=client-id:client-secret --scope myOAuth=read,write
+
+<span class="c"># static header, env var expanded at startup</span>
+npx openapi-mcp-runtime ./api.yaml --header <span class="s">"X-Tenant=$TENANT_ID"</span></pre>
+  </div>
+</section>
+
+<section id="api">
+  <div class="wrap">
+    <h2>Programmatic API</h2>
+    <p class="lead">The same building blocks the CLI uses, available as an ESM/TypeScript library.</p>
+    <pre><span class="p">import</span> { createHandler, createRuntime, executeTool, loadSpec, startHttpServer } <span class="p">from</span> <span class="s">"openapi-mcp-runtime"</span>;
+
+<span class="p">const</span> spec = <span class="p">await</span> loadSpec(<span class="s">"./petstore.yaml"</span>);   <span class="c">// file or URL, $refs resolved</span>
+<span class="p">const</span> runtime = createRuntime(spec, { baseUrl: <span class="s">"https://api.example.com"</span> });
+
+<span class="p">const</span> tool = runtime.tools.find((t) =&gt; t.name === <span class="s">"listPets"</span>);
+<span class="p">const</span> result = <span class="p">await</span> executeTool(tool, { limit: 10 }, {
+  baseUrl: runtime.baseUrl,
+  auth: { bearer: process.env.TOKEN },
+  security: tool.security,
+  securitySchemes: runtime.securitySchemes,
+  cacheTtl: 60,
+});
+
+<span class="p">const</span> handler = createHandler({ tools: runtime.tools, execute });
+<span class="p">await</span> startHttpServer(handler, { port: 8787 });</pre>
+    <h3 style="margin-top:28px">Generate a typed client</h3>
+    <pre>npx openapi-mcp-runtime ./api.yaml --generate-client ./api-client.ts</pre>
+    <pre><span class="p">import</span> { callTool } <span class="p">from</span> <span class="s">"./api-client.ts"</span>;
+<span class="p">const</span> pets = <span class="p">await</span> callTool(<span class="s">"listPets"</span>, { limit: 10 });</pre>
+  </div>
+</section>
+
+<section id="faq" class="faq">
+  <div class="wrap">
+    <h2>FAQ</h2>
+    <p class="lead">Short answers to the questions that come up most.</p>
+    <details><summary>Which specification versions are supported?</summary><p>OpenAPI 3.0.x, 3.1.x and Swagger 2.0, in JSON or YAML, from a local file or an <code>http(s)://</code> URL. Internal, external-file and remote <code>$ref</code>s are dereferenced.</p></details>
+    <details><summary>How do tools get their names?</summary><p><code>operationId</code> when present; otherwise a sanitized <code>method_path</code> form. Names are unique, MCP-safe (<code>[a-zA-Z0-9_-]</code>, max 64 chars). Use <code>x-mcp-exclude: true</code> on an operation to hide it.</p></details>
+    <details><summary>How are request bodies mapped?</summary><p>An object body schema's properties become top-level tool arguments. Non-object bodies are exposed as a single <code>body</code> argument. Path, query and header parameters are mapped to their own arguments.</p></details>
+    <details><summary>Which Node versions work?</summary><p>Node.js 18.17 and newer (the package uses global <code>fetch</code> and <code>AbortSignal.timeout</code>).</p></details>
+    <details><summary>How does the HTTP transport work?</summary><p>Streamable HTTP: <code>POST /mcp</code> for JSON-RPC requests, <code>GET /mcp</code> for the server event stream, <code>GET /health</code> for liveness. CORS is open so browser-based clients can connect.</p></details>
+    <details><summary>Is this affiliated with the OpenAPI or Anthropic projects?</summary><p>No. Independent, MIT-licensed tooling maintained by <b>japofc</b>.</p></details>
+    <details><summary>Can I fork and rebrand it?</summary><p>The code is MIT, so you may fork, modify and redistribute it as long as the copyright notice and license text stay intact. The name <b>japofc</b> and the project branding are trademarks and are not licensed — see <code>TRADEMARK.md</code> in the repository.</p></details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><span class="wm">japofc</span> — author &amp; maintainer · MIT License · © 2026</p>
+    <p>openapi-mcp-runtime · OpenAPI 3.0 / 3.1 / Swagger 2.0 → MCP server · stdio &amp; HTTP</p>
+    <p style="font-size:12px">japofc is a trademark of japofc. The license covers the code only; see TRADEMARK.md.</p>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll(".tabs").forEach(function (group) {
+    var tabs = group.querySelectorAll(".tab");
+    var panels = group.parentElement.querySelectorAll(".tab-panel");
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        tabs.forEach(function (t) { t.classList.remove("active"); });
+        panels.forEach(function (p) { p.classList.remove("active"); });
+        tab.classList.add("active");
+        var panel = group.parentElement.querySelector('[data-tab="' + tab.dataset.tab + '"]');
+        if (panel) panel.classList.add("active");
+      });
+    });
+  });
+</script>
+</body>
+</html>

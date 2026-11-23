@@ -1,0 +1,9 @@
+{
+  // Cursor config: .cursor/mcp.json
+  "mcpServers": {
+    "petstore": {
+      "command": "npx",
+      "args": ["-y", "openapi-mcp-runtime", "./examples/petstore.yaml"]
+    }
+  }
+}

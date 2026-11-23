@@ -1,0 +1,43 @@
+{
+  "swagger": "2.0",
+  "info": { "title": "Legacy API", "version": "1.0.0" },
+  "host": "127.0.0.1:4010",
+  "basePath": "/v1",
+  "schemes": ["http"],
+  "securityDefinitions": {
+    "api_key": { "type": "apiKey", "in": "query", "name": "api_key" }
+  },
+  "security": [{ "api_key": [] }],
+  "paths": {
+    "/users/{id}": {
+      "get": {
+        "operationId": "getUser",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "integer" },
+          { "name": "fields", "in": "query", "type": "string" }
+        ],
+        "responses": { "200": { "description": "ok" } }
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "createUser",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": { "type": "string" }
+              },
+              "required": ["email"]
+            }
+          }
+        ],
+        "responses": { "201": { "description": "created" } }
+      }
+    }
+  }
+}

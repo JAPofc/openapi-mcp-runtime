@@ -1,0 +1,23 @@
+{
+  // Claude Desktop config: ~/Library/Application Support/Claude/claude_desktop_config.json
+  "mcpServers": {
+    "petstore": {
+      "command": "npx",
+      "args": ["-y", "openapi-mcp-runtime", "${PWD}/examples/petstore.yaml"]
+    },
+    "petstore-http": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "openapi-mcp-runtime",
+        "${PWD}/examples/petstore.yaml",
+        "--transport",
+        "http",
+        "--port",
+        "8787",
+        "--host",
+        "127.0.0.1"
+      ]
+    }
+  }
+}
