@@ -131,7 +131,9 @@
     <p class="lead">A runtime, not a code generator. The server proxies the live API, so spec changes take effect on restart.</p>
     <div class="grid">
       <div class="card"><h3>Zero-config</h3><p>One command, any spec. Tools are live immediately.</p></div>
-      <div class="card"><h3>stdio + HTTP</h3><p>Claude Desktop / Cursor over stdio, remote clients over Streamable HTTP.</p></div>
+      <div class="card"><h3>stdio + HTTP + SSE</h3><p>Claude Desktop / Cursor over stdio, modern clients over Streamable HTTP, older clients over legacy SSE.</p></div>
+      <div class="card"><h3>Resilient</h3><p>Exponential-backoff retries and optional hot-reload of the spec file.</p></div>
+      <div class="card"><h3>Namespaced tools</h3><p>Serve several APIs side by side with <code>--tool-prefix</code>.</p></div>
       <div class="card"><h3>Full security</h3><p><code>apiKey</code>, <code>bearer</code>, <code>basic</code>, OAuth2 client credentials.</p></div>
       <div class="card"><h3>Typed tools</h3><p>Arguments derive from the spec's JSON Schemas.</p></div>
       <div class="card"><h3>GET caching</h3><p>Optional TTL cache for idempotent reads.</p></div>
@@ -243,7 +245,7 @@ app.get(<span class="s">"/health"</span>, (c) => c.json({ ok: <span class="p">tr
     <table>
       <thead><tr><th>Option</th><th>Description</th></tr></thead>
       <tbody>
-        <tr><td><code>--transport &lt;stdio|http&gt;</code></td><td>Transport to serve (default <code>stdio</code>).</td></tr>
+        <tr><td><code>--transport &lt;stdio|http|sse&gt;</code></td><td>Transport to serve (default <code>stdio</code>); <code>sse</code> is the legacy HTTP+SSE transport.</td></tr>
         <tr><td><code>--port &lt;number&gt;</code></td><td>HTTP port (default <code>8787</code>).</td></tr>
         <tr><td><code>--host &lt;host&gt;</code></td><td>HTTP host (default <code>127.0.0.1</code>; use <code>0.0.0.0</code> to expose).</td></tr>
         <tr><td><code>--server &lt;url&gt;</code></td><td>Override the server URL from the spec.</td></tr>
@@ -255,6 +257,9 @@ app.get(<span class="s">"/health"</span>, (c) => c.json({ ok: <span class="p">tr
         <tr><td><code>--scope &lt;SCHEME=a,b&gt;</code></td><td>OAuth2 scopes, repeatable.</td></tr>
         <tr><td><code>--cache-ttl &lt;seconds&gt;</code></td><td>Cache <code>GET</code> responses for N seconds (default <code>0</code>).</td></tr>
         <tr><td><code>--timeout &lt;ms&gt;</code></td><td>Request timeout in milliseconds (default <code>30000</code>).</td></tr>
+        <tr><td><code>--retries &lt;n&gt;</code></td><td>Extra attempts for network failures and 5xx responses (default <code>0</code>).</td></tr>
+        <tr><td><code>--watch</code></td><td>Reload automatically when a local spec file changes.</td></tr>
+        <tr><td><code>--tool-prefix &lt;prefix&gt;</code></td><td>Prefix every tool name, e.g. <code>petstore_getPets</code>.</td></tr>
         <tr><td><code>--print-tools</code></td><td>Print generated tools as JSON and exit.</td></tr>
         <tr><td><code>--generate-types &lt;file&gt;</code></td><td>Write TypeScript argument types to a file.</td></tr>
         <tr><td><code>--generate-client &lt;file&gt;</code></td><td>Write a self-contained TypeScript client.</td></tr>

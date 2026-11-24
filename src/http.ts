@@ -106,7 +106,7 @@ export async function startHttpServer(
   };
 }
 
-function readBody(req: any): Promise<string> {
+export function readBody(req: any): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     req.on("data", (chunk: Buffer) => chunks.push(chunk));

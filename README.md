@@ -31,7 +31,9 @@ npx openapi-mcp-runtime ./petstore.yaml
 dereferences every `$ref`, and serves tools that proxy the live API.
 
 - Reads OpenAPI 3.0.x, 3.1.x and Swagger 2.0 documents (JSON or YAML), from disk or a URL.
-- Serves tools over **stdio** (Claude Desktop, Cursor, CLI agents) or **Streamable HTTP** (remote clients, custom integrations).
+- Serves tools over **stdio** (Claude Desktop, Cursor, CLI agents), **Streamable HTTP**, or the **legacy HTTP+SSE** transport.
+- Retries failed calls with exponential backoff (`--retries`) and can hot-reload the spec when the file changes (`--watch`).
+- Optional namespacing of tool names (`--tool-prefix`) when serving several APIs side by side.
 - Applies the spec's security: `apiKey` (header/query/cookie), HTTP `bearer`, HTTP `basic`, and OAuth2 client credentials.
 - Builds tool arguments from the spec's schemas, so agents get JSON Schema hints for path, query, header and body values.
 - Optionally caches `GET` responses for a TTL.
@@ -71,6 +73,14 @@ Serve it over HTTP:
 npx openapi-mcp-runtime ./petstore.yaml --transport http --port 8787
 # MCP endpoint:  http://127.0.0.1:8787/mcp
 # Health check:  http://127.0.0.1:8787/health
+```
+
+Use the legacy HTTP+SSE transport (still used by some older clients):
+
+```bash
+npx openapi-mcp-runtime ./petstore.yaml --transport sse --port 8787
+# SSE stream:    http://127.0.0.1:8787/sse
+# Messages:      http://127.0.0.1:8787/message
 ```
 
 Inspect the tools that would be exposed:
@@ -124,7 +134,7 @@ Ready-made configurations and framework adapters are in
 
 | Option | Description |
 |---|---|
-| `--transport <stdio\|http>` | Transport to serve (default `stdio`). |
+| `--transport <stdio\|http\|sse>` | Transport to serve (default `stdio`). `sse` is the legacy HTTP+SSE transport. |
 | `--port <number>` | HTTP port (default `8787`). |
 | `--host <host>` | HTTP host (default `127.0.0.1`; use `0.0.0.0` to expose). |
 | `--server <url>` | Override the server URL from the spec. |
@@ -136,6 +146,9 @@ Ready-made configurations and framework adapters are in
 | `--scope <SCHEME=a,b>` | OAuth2 scopes, repeatable. |
 | `--cache-ttl <seconds>` | Cache `GET` responses for N seconds (default `0`). |
 | `--timeout <ms>` | Request timeout in milliseconds (default `30000`). |
+| `--retries <n>` | Extra attempts for network failures and 5xx responses (default `0`). |
+| `--watch` | Reload automatically when a local spec file changes. |
+| `--tool-prefix <prefix>` | Prefix every tool name, e.g. `petstore_getPets`. |
 | `--print-tools` | Print generated tools as JSON and exit. |
 | `--generate-types <file>` | Write TypeScript argument types to a file. |
 | `--generate-client <file>` | Write a self-contained TypeScript client. |

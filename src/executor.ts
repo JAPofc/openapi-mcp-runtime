@@ -115,11 +115,26 @@ export async function executeTool(
   }
 
   const fetchFn = ctx.fetchFn ?? fetch;
-  let res: Response;
-  try {
-    res = await fetchFn(url, { ...init, signal: AbortSignal.timeout(ctx.timeout ?? 30_000) });
-  } catch (err: any) {
-    const message = `Request failed: ${err?.name === "TimeoutError" ? "timeout" : err?.message ?? String(err)}`;
+  const maxAttempts = 1 + Math.max(0, Math.floor(ctx.retries ?? 0));
+  const baseDelay = Math.max(0, ctx.retryDelayMs ?? 250);
+
+  let res: Response | null = null;
+  let lastError: any = null;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      res = await fetchFn(url, { ...init, signal: AbortSignal.timeout(ctx.timeout ?? 30_000) });
+      lastError = null;
+      if (res.status < 500 || attempt === maxAttempts - 1) break;
+    } catch (err) {
+      lastError = err;
+      if (attempt === maxAttempts - 1) break;
+    }
+    await sleep(baseDelay * 2 ** attempt);
+  }
+
+  if (!res) {
+    const reason = lastError?.name === "TimeoutError" ? "timeout" : lastError?.message ?? String(lastError);
+    const message = `Request failed after ${maxAttempts} attempt(s): ${reason}`;
     throw new RequestError(
       message,
       { url, method, status: 0, headers: {}, text: message, durationMs: Date.now() - started },
@@ -153,4 +168,8 @@ export async function executeTool(
 
 function emptyResult(url: string, method: string, started: number): ExecuteResult {
   return { url, method, status: 0, headers: {}, text: "", durationMs: Date.now() - started };
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

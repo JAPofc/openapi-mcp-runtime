@@ -53,6 +53,10 @@ export interface RuntimeOptions {
   timeout?: number;
   /** Custom fetch implementation (testing). */
   fetchFn?: typeof fetch;
+  /** Extra attempts for network failures and 5xx responses. */
+  retries?: number;
+  /** Base delay between retries in milliseconds (exponential backoff). */
+  retryDelayMs?: number;
 }
 
 export interface ExecuteResult {

@@ -192,6 +192,23 @@ export function sanitizeName(input: string): string {
   return cleaned || "tool";
 }
 
+/** Prefix every tool name, e.g. `petstore_getPets`. */
+export function applyToolPrefix(tools: McpTool[], prefix: string): void {
+  const clean = prefix
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^[_-]+|[_-]+$/g, "")
+    .slice(0, 48);
+  if (!clean) return;
+  const used = new Set<string>();
+  for (const tool of tools) {
+    let name = sanitizeName(`${clean}_${tool.name}`);
+    let counter = 2;
+    while (used.has(name)) name = sanitizeName(`${clean}_${tool.name}_${counter++}`);
+    used.add(name);
+    tool.name = name;
+  }
+}
+
 /** Public projection of a tool (what `tools/list` returns). */
 export function publicTool(tool: McpTool) {
   return {

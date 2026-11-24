@@ -4,13 +4,15 @@
 // https://github.com/japofc/openapi-mcp-runtime
 
 import { writeFile } from "node:fs/promises";
+import { watch as watchFile } from "node:fs";
 import { createRequire } from "node:module";
 import { loadSpec, specLabel } from "./openapi.js";
-import { createRuntime, publicTool } from "./tools.js";
+import { applyToolPrefix, createRuntime, publicTool } from "./tools.js";
 import { executeTool } from "./executor.js";
 import { createHandler } from "./server.js";
 import { startStdioServer } from "./stdio.js";
 import { startHttpServer } from "./http.js";
+import { startSseServer } from "./sse.js";
 import { generateClient, generateTypes } from "./client.js";
 import type { AuthOptions, OAuth2Credential } from "./types.js";
 
@@ -29,7 +31,7 @@ Arguments:
   <spec>                     Path or URL to an OpenAPI (3.0/3.1) or Swagger 2.0 document.
 
 Options:
-  --transport <stdio|http>   Transport to serve (default: stdio).
+  --transport <stdio|http|sse> Transport to serve (default: stdio). "sse" is the legacy HTTP+SSE transport.
   --port <number>            HTTP port (default: 8787).
   --host <host>              HTTP host (default: 127.0.0.1, use 0.0.0.0 to expose).
   --server <url>             Override the server URL from the spec.
@@ -41,6 +43,9 @@ Options:
   --scope <SCHEME=a,b>       OAuth2 scopes, repeatable.
   --cache-ttl <seconds>      Cache GET responses for N seconds (default: 0).
   --timeout <ms>             Request timeout in milliseconds (default: 30000).
+  --retries <n>              Extra attempts for network failures and 5xx responses (default: 0).
+  --watch                    Reload automatically when a local spec file changes.
+  --tool-prefix <prefix>     Prefix every tool name, e.g. petstore_getPets.
   --print-tools              Print the generated MCP tools as JSON and exit.
   --generate-types <file>    Write TypeScript tool argument types to <file> and exit.
   --generate-client <file>   Write a self-contained TypeScript client to <file> and exit.
@@ -51,13 +56,15 @@ Options:
 Examples:
   omcp ./petstore.yaml
   omcp https://api.example.com/openapi.json --transport http --port 8787
-  omcp ./api.yaml --bearer "$TOKEN" --cache-ttl 60
+  omcp ./api.yaml --transport sse --port 8787
+  omcp ./api.yaml --bearer "$TOKEN" --cache-ttl 60 --retries 2
+  omcp ./api.yaml --watch --tool-prefix acme
   omcp ./api.yaml --print-tools
 `;
 
 interface CliOptions {
   spec?: string;
-  transport: "stdio" | "http";
+  transport: "stdio" | "http" | "sse";
   port: number;
   host: string;
   headers: Record<string, string>;
@@ -67,6 +74,9 @@ interface CliOptions {
   oauth2: Record<string, OAuth2Credential>;
   cacheTtl: number;
   timeout: number;
+  retries: number;
+  watch: boolean;
+  toolPrefix?: string;
   server?: string;
   printTools: boolean;
   generateTypesFile?: string;
@@ -86,6 +96,8 @@ function parseArgs(argv: string[]): CliOptions {
     oauth2: {},
     cacheTtl: 0,
     timeout: 30_000,
+    retries: 0,
+    watch: false,
     printTools: false,
     verbose: false,
     help: false,
@@ -105,9 +117,9 @@ function parseArgs(argv: string[]): CliOptions {
 
     switch (arg) {
       case "--transport":
-        options.transport = next() as "stdio" | "http";
-        if (options.transport !== "stdio" && options.transport !== "http") {
-          throw new Error(`Invalid --transport "${options.transport}" (expected stdio or http).`);
+        options.transport = next() as "stdio" | "http" | "sse";
+        if (options.transport !== "stdio" && options.transport !== "http" && options.transport !== "sse") {
+          throw new Error(`Invalid --transport "${options.transport}" (expected stdio, http or sse).`);
         }
         break;
       case "--port":
@@ -166,6 +178,16 @@ function parseArgs(argv: string[]): CliOptions {
       case "--timeout":
         options.timeout = Number(next());
         if (!Number.isFinite(options.timeout) || options.timeout <= 0) throw new Error(`Invalid --timeout "${argv[i]}".`);
+        break;
+      case "--retries":
+        options.retries = Number(next());
+        if (!Number.isInteger(options.retries) || options.retries < 0) throw new Error(`Invalid --retries "${argv[i]}".`);
+        break;
+      case "--watch":
+        options.watch = true;
+        break;
+      case "--tool-prefix":
+        options.toolPrefix = next();
         break;
       case "--print-tools":
         options.printTools = true;
@@ -245,7 +267,8 @@ async function main(): Promise<void> {
   }
 
   const spec = await loadSpec(options.spec);
-  const runtime = createRuntime(spec, { baseUrl: options.server });
+  let runtime = createRuntime(spec, { baseUrl: options.server });
+  if (options.toolPrefix) applyToolPrefix(runtime.tools, options.toolPrefix);
   const auth = buildAuth(options);
 
   const log = (message: string) => process.stderr.write(`[openapi-mcp] ${message}\n`);
@@ -278,6 +301,7 @@ async function main(): Promise<void> {
         auth,
         cacheTtl: options.cacheTtl,
         timeout: options.timeout,
+        retries: options.retries,
         security: tool.security,
         securitySchemes: runtime.securitySchemes,
       });
@@ -288,10 +312,51 @@ async function main(): Promise<void> {
   log(`Base URL: ${runtime.baseUrl}`);
   if (options.cacheTtl > 0) log(`GET cache TTL: ${options.cacheTtl}s`);
   if (options.verbose) log(`Auth: ${JSON.stringify(redact(auth))}`);
+  if (options.retries > 0) log(`Retries: ${options.retries}`);
+  if (options.toolPrefix) log(`Tool prefix: ${options.toolPrefix}`);
+
+  if (options.watch && !/^https?:\/\//.test(options.spec)) {
+    const reload = async () => {
+      try {
+        const fresh = await loadSpec(options.spec as string);
+        const next = createRuntime(fresh, { baseUrl: options.server });
+        if (options.toolPrefix) applyToolPrefix(next.tools, options.toolPrefix);
+        runtime.spec = next.spec;
+        runtime.kind = next.kind;
+        runtime.baseUrl = next.baseUrl;
+        runtime.securitySchemes = next.securitySchemes;
+        runtime.globalSecurity = next.globalSecurity;
+        runtime.tools.splice(0, runtime.tools.length, ...next.tools);
+        byName.clear();
+        for (const tool of runtime.tools) byName.set(tool.name, tool);
+        log(`Reloaded ${specLabel(fresh)} from ${options.spec} — ${runtime.tools.length} tool(s) exposed.`);
+      } catch (err: any) {
+        log(`Reload failed: ${err?.message ?? String(err)}`);
+      }
+    };
+    let timer: NodeJS.Timeout | undefined;
+    watchFile(options.spec as string, () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => void reload(), 200);
+    });
+    log("Watching spec file for changes");
+  }
 
   if (options.transport === "stdio") {
     log("Transport: stdio (JSON-RPC over stdin/stdout)");
     startStdioServer(handler);
+    return;
+  }
+
+  if (options.transport === "sse") {
+    const running = await startSseServer(handler, { port: options.port, host: options.host });
+    log(`Transport: SSE — stream ${running.url}`);
+    log(`Message endpoint: http://${options.host}:${running.port}/message`);
+    log(`Health check: http://${options.host}:${running.port}/health`);
+
+    const shutdown = () => running.close().finally(() => process.exit(0));
+    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
     return;
   }
 

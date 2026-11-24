@@ -44,3 +44,21 @@ test("missing spec exits with an error", () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /missing <spec>/);
 });
+
+test("--tool-prefix namespaces the printed tools", () => {
+  const result = run(["--print-tools", "--tool-prefix", "acme", fixture("petstore-3.0.json")]);
+  assert.equal(result.status, 0, result.stderr);
+  const tools = JSON.parse(result.stdout);
+  assert.deepEqual(
+    tools.map((tool) => tool.name),
+    ["acme_getPetById", "acme_deletePet", "acme_createPet"],
+  );
+});
+
+test("--help documents the new options", () => {
+  const result = run(["--help"]);
+  assert.match(result.stdout, /--transport <stdio\|http\|sse>/);
+  assert.match(result.stdout, /--retries/);
+  assert.match(result.stdout, /--watch/);
+  assert.match(result.stdout, /--tool-prefix/);
+});
